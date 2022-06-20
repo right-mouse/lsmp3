@@ -1,0 +1,10 @@
+[package]
+name = "lsmp3"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+glob = "0.3.0"
+id3 = "1.2.0"
+main_error = "0.1.2"
+tabled = "0.7.0"
