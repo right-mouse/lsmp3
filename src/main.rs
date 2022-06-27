@@ -1,6 +1,6 @@
 use clap::{clap_derive::ArgEnum, CommandFactory, Parser};
 use serde_json::{json, Value};
-use std::error::Error;
+use std::{error::Error, io::Write};
 use tabled::Table;
 
 mod ls;
@@ -10,9 +10,12 @@ fn capitalize_first_letter(s: &str) -> String {
 }
 
 fn error(err: impl Error) -> ! {
-    Args::command()
+    let _ = Args::command()
         .error(clap::ErrorKind::Io, capitalize_first_letter(&err.to_string()))
-        .exit();
+        .print();
+    let _ = std::io::stdout().lock().flush();
+    let _ = std::io::stderr().lock().flush();
+    std::process::exit(1)
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ArgEnum)]
