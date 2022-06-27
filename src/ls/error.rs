@@ -18,7 +18,7 @@ impl fmt::Display for LsError {
             f,
             "{}",
             match self {
-                LsError::InvalidPath(path) => format!("path {:?} is not a directory", path),
+                LsError::InvalidPath(path) => format!("cannot access {:?}: no such file or directory", path),
                 LsError::PatternError(err) => format!("glob syntax error: {}", err.msg),
                 LsError::GlobError(err) => format!("{}", err),
                 LsError::Id3Error(file, err) => format!("attempting to read {:?} resulted in an error: {}", file, err),
