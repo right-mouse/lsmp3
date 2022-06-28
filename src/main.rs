@@ -1,6 +1,6 @@
 use clap::{clap_derive::ArgEnum, CommandFactory, Parser};
 use serde_json::{json, Value};
-use std::{error::Error, io::Write};
+use std::{cmp::Ordering, error::Error, io::Write};
 use tabled::Table;
 
 mod ls;
@@ -52,16 +52,55 @@ struct Args {
     #[clap(value_parser)]
     format: Format,
 
-    /// Sort by WORD
+    /// Sort by WORD (can be set multiple times)
     #[clap(long = "sort", short = 's')]
     #[clap(value_name = "WORD")]
     #[clap(arg_enum)]
+    #[clap(multiple = true)]
+    #[clap(number_of_values = 1)]
     #[clap(default_value = "file-name")]
     #[clap(value_parser)]
-    sort_by: SortBy,
+    sort_by: Vec<SortBy>,
 }
 
-fn to_table(res: &Vec<ls::Entry>) -> String {
+/// Performs a case insensitive comparison.
+fn cmp_option_vec_string(a: &Option<Vec<String>>, b: &Option<Vec<String>>) -> Ordering {
+    match (a, b) {
+        (Some(a), Some(b)) => a
+            .iter()
+            .map(|s| s.to_lowercase())
+            .cmp(b.iter().map(|s| s.to_lowercase())),
+        _ => a.cmp(b),
+    }
+}
+
+/// Compares the given key for an entry.
+fn cmp_entry_key(a: &ls::Entry, b: &ls::Entry, key: &SortBy) -> Ordering {
+    match key {
+        SortBy::FileName => a.file_name.cmp(&b.file_name),
+        SortBy::FileSize => a.file_size.cmp(&b.file_size),
+        SortBy::Title => cmp_option_vec_string(&a.title, &b.title),
+        SortBy::Artist => cmp_option_vec_string(&a.artist, &b.artist),
+        SortBy::Album => cmp_option_vec_string(&a.album, &b.album),
+        SortBy::Year => a.year.cmp(&b.year),
+        SortBy::Track => a.track.cmp(&b.track),
+        SortBy::Genre => cmp_option_vec_string(&a.genre, &b.genre),
+    }
+}
+
+/// Compares the given keys for an entry in order. If the comparison for the first key yields an equal result, the next
+/// key is compared until either the result is non-equal or all keys have been compared.
+fn cmp_entry(a: &ls::Entry, b: &ls::Entry, keys: &[SortBy]) -> Ordering {
+    if keys.is_empty() {
+        return Ordering::Equal;
+    }
+    match cmp_entry_key(a, b, &keys[0]) {
+        Ordering::Equal => cmp_entry(a, b, &keys[1..]),
+        other => other,
+    }
+}
+
+fn to_table(res: &[ls::Entry]) -> String {
     if res.is_empty() {
         Default::default()
     } else {
@@ -72,7 +111,7 @@ fn to_table(res: &Vec<ls::Entry>) -> String {
     }
 }
 
-fn to_json(res: &Vec<ls::Entry>) -> Value {
+fn to_json(res: &[ls::Entry]) -> Value {
     serde_json::to_value(res).unwrap_or_else(|err| error(err))
 }
 
@@ -87,16 +126,7 @@ fn main() {
         .iter()
         .map(|f| {
             let mut v = ls::list(f).unwrap_or_else(|err| error(err));
-            v.entries.sort_unstable_by(|a, b| match args.sort_by {
-                SortBy::FileName => a.file_name.cmp(&b.file_name),
-                SortBy::FileSize => a.file_size.cmp(&b.file_size),
-                SortBy::Title => a.title.cmp(&b.title),
-                SortBy::Artist => a.artist.cmp(&b.artist),
-                SortBy::Album => a.album.cmp(&b.album),
-                SortBy::Year => a.year.cmp(&b.year),
-                SortBy::Track => a.track.cmp(&b.track),
-                SortBy::Genre => a.genre.cmp(&b.genre),
-            });
+            v.entries.sort_unstable_by(|a, b| cmp_entry(a, b, &args.sort_by));
             v
         })
         .collect();
@@ -113,9 +143,11 @@ fn main() {
     } else {
         let (files, dirs): (Vec<_>, Vec<_>) = results.into_iter().partition(|f| f.file_type == ls::FileType::File);
         if !files.is_empty() {
+            let mut f = files.into_iter().map(|f| f.entries).flatten().collect::<Vec<_>>();
+            f.sort_unstable_by(|a, b| cmp_entry(a, b, &args.sort_by));
             match args.format {
-                Format::Table => tables.push(to_table(&files.into_iter().map(|f| f.entries).flatten().collect())),
-                Format::JSON => values.push(to_json(&files.into_iter().map(|f| f.entries).flatten().collect())),
+                Format::Table => tables.push(to_table(&f)),
+                Format::JSON => values.push(to_json(&f)),
             }
         }
         if !dirs.is_empty() {
