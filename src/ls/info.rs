@@ -2,11 +2,11 @@ use serde::{
     ser::{SerializeSeq, Serializer},
     Deserialize, Serialize,
 };
-use std::{ffi::OsString, os::unix::prelude::OsStrExt};
+use std::ffi::OsString;
 use tabled::Tabled;
 
 fn display_os_string(os_str: &OsString) -> String {
-    String::from_utf8_lossy(os_str.as_bytes()).to_string()
+    os_str.to_string_lossy().to_string()
 }
 
 fn serialize_os_string<S>(os_str: &OsString, s: S) -> Result<S::Ok, S::Error>

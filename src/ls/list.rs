@@ -1,7 +1,7 @@
 use super::*;
 use glob::glob;
 use id3::{Tag, TagLike};
-use std::{ffi::OsString, fs::canonicalize, path::PathBuf};
+use std::{ffi::OsString, path::PathBuf};
 
 pub fn list(file: &str) -> Result<Info, LsError> {
     let path = if file.is_empty() {
@@ -17,12 +17,12 @@ pub fn list(file: &str) -> Result<Info, LsError> {
     }
 
     let (results, file_type) = if path.is_dir() {
-        let canonical_path = match canonicalize(&path) {
-            Ok(p) => p,
-            Err(err) => return Err(LsError::IoCanonError(path.into_os_string(), err)),
+        let p = path.join("*.mp3");
+        let expr = match p.to_str() {
+            Some(s) => s,
+            None => return Err(LsError::CannotGlobPath(path.into_os_string())),
         };
-        let expr = format!("{}/{}", canonical_path.into_os_string().into_string()?, "*.mp3");
-        (glob(&expr)?.into_iter().collect(), FileType::Directory)
+        (glob(expr)?.into_iter().collect(), FileType::Directory)
     } else {
         (vec![Ok(path)], FileType::File)
     };
