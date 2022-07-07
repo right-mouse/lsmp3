@@ -84,6 +84,18 @@ fn human_readable_size(s: &u64) -> String {
     format!("{0:3.2$} {1}", val, suffix, if val < 10.0 { 1 } else { 0 })
 }
 
+#[derive(Debug, PartialEq, Eq)]
+pub enum PathType {
+    File,
+    Directory,
+}
+
+pub struct Info {
+    pub path: String,
+    pub entries: Vec<Entry>,
+    pub path_type: PathType,
+}
+
 #[derive(PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct Track {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -137,16 +149,4 @@ pub struct Entry {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[serde(serialize_with = "serialize_option_vec_string")]
     pub genre: Option<Vec<String>>,
-}
-
-#[derive(Debug, PartialEq, Eq)]
-pub enum FileType {
-    File,
-    Directory,
-}
-
-pub struct Info {
-    pub path: String,
-    pub entries: Vec<Entry>,
-    pub file_type: FileType,
 }

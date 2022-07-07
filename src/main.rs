@@ -1,6 +1,6 @@
 use clap::{clap_derive::ArgEnum, CommandFactory, Parser};
 use serde_json::{json, Value};
-use std::{cmp::Ordering, error::Error, io::Write};
+use std::{error::Error, io::Write};
 use tabled::Table;
 
 mod ls;
@@ -22,18 +22,6 @@ fn error(err: impl Error) -> ! {
 enum Format {
     Table,
     JSON,
-}
-
-#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ArgEnum)]
-enum SortBy {
-    FileName,
-    FileSize,
-    Title,
-    Artist,
-    Album,
-    Year,
-    Track,
-    Genre,
 }
 
 #[derive(Debug, Parser)]
@@ -60,44 +48,7 @@ struct Args {
     #[clap(number_of_values = 1)]
     #[clap(default_value = "file-name")]
     #[clap(value_parser)]
-    sort_by: Vec<SortBy>,
-}
-
-/// Performs a case insensitive comparison.
-fn cmp_option_vec_string(a: &Option<Vec<String>>, b: &Option<Vec<String>>) -> Ordering {
-    match (a, b) {
-        (Some(a), Some(b)) => a
-            .iter()
-            .map(|s| s.to_lowercase())
-            .cmp(b.iter().map(|s| s.to_lowercase())),
-        _ => a.cmp(b),
-    }
-}
-
-/// Compares the given key for an entry.
-fn cmp_entry_key(a: &ls::Entry, b: &ls::Entry, key: &SortBy) -> Ordering {
-    match key {
-        SortBy::FileName => a.file_name.cmp(&b.file_name),
-        SortBy::FileSize => a.file_size.cmp(&b.file_size),
-        SortBy::Title => cmp_option_vec_string(&a.title, &b.title),
-        SortBy::Artist => cmp_option_vec_string(&a.artist, &b.artist),
-        SortBy::Album => cmp_option_vec_string(&a.album, &b.album),
-        SortBy::Year => a.year.cmp(&b.year),
-        SortBy::Track => a.track.cmp(&b.track),
-        SortBy::Genre => cmp_option_vec_string(&a.genre, &b.genre),
-    }
-}
-
-/// Compares the given keys for an entry in order. If the comparison for the first key yields an equal result, the next
-/// key is compared until either the result is non-equal or all keys have been compared.
-fn cmp_entry(a: &ls::Entry, b: &ls::Entry, keys: &[SortBy]) -> Ordering {
-    if keys.is_empty() {
-        return Ordering::Equal;
-    }
-    match cmp_entry_key(a, b, &keys[0]) {
-        Ordering::Equal => cmp_entry(a, b, &keys[1..]),
-        other => other,
-    }
+    sort_by: Vec<ls::SortBy>,
 }
 
 fn to_table(res: &[ls::Entry]) -> String {
@@ -116,21 +67,9 @@ fn to_json(res: &[ls::Entry]) -> Value {
 }
 
 fn main() {
-    let mut args = Args::parse();
-    if args.file.len() == 0 {
-        args.file = vec!["".to_string()];
-    }
+    let args = Args::parse();
 
-    let results: Vec<_> = args
-        .file
-        .iter()
-        .map(|f| {
-            let mut v = ls::list(f).unwrap_or_else(|err| error(err));
-            v.entries.sort_unstable_by(|a, b| cmp_entry(a, b, &args.sort_by));
-            v
-        })
-        .collect();
-
+    let results = ls::list(&args.file, &ls::ListOptions { sort_by: &args.sort_by }).unwrap_or_else(|err| error(err));
     let (mut tables, mut values): (Vec<String>, Vec<Value>) = match args.format {
         Format::Table => (Vec::with_capacity(results.len()), Vec::with_capacity(0)),
         Format::JSON => (Vec::with_capacity(0), Vec::with_capacity(results.len())),
@@ -141,10 +80,10 @@ fn main() {
             Format::JSON => values.push(to_json(&results[0].entries)),
         }
     } else {
-        let (files, dirs): (Vec<_>, Vec<_>) = results.into_iter().partition(|f| f.file_type == ls::FileType::File);
+        let (files, dirs): (Vec<_>, Vec<_>) = results.into_iter().partition(|f| f.path_type == ls::PathType::File);
         if !files.is_empty() {
             let mut f = files.into_iter().map(|f| f.entries).flatten().collect::<Vec<_>>();
-            f.sort_unstable_by(|a, b| cmp_entry(a, b, &args.sort_by));
+            f.sort_unstable_by(|a, b| ls::cmp_entry(a, b, &args.sort_by));
             match args.format {
                 Format::Table => tables.push(to_table(&f)),
                 Format::JSON => values.push(to_json(&f)),
