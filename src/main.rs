@@ -10,11 +10,11 @@ fn capitalize_first_letter(s: &str) -> String {
 }
 
 fn error(err: impl Error) -> ! {
-    let _ = Args::command()
+    _ = Args::command()
         .error(clap::ErrorKind::Io, capitalize_first_letter(&err.to_string()))
         .print();
-    let _ = std::io::stdout().lock().flush();
-    let _ = std::io::stderr().lock().flush();
+    _ = std::io::stdout().lock().flush();
+    _ = std::io::stderr().lock().flush();
     std::process::exit(1)
 }
 

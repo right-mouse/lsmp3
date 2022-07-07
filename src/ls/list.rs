@@ -24,8 +24,8 @@ fn list_path(path: PathBuf, options: &ListOptions) -> Result<Info, LsError> {
     }
 
     let (path_type, files) = if path.is_dir() {
-        // If the given path is a directory, walk through the directory and attempt to parse all files, skipping the
-        // ones that fail to parse (assume they aren't mp3 files).
+        // If the given path is a directory, walk through it and attempt to parse all files. Assume the ones that fail
+        // to parse aren't mp3 files and skip them.
         (
             PathType::Directory,
             fs::read_dir(&path)
