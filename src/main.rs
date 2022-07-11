@@ -51,6 +51,7 @@ struct Args {
     sort_by: Vec<ls::SortBy>,
 }
 
+#[inline]
 fn to_table(res: &[ls::Entry]) -> String {
     if res.is_empty() {
         Default::default()
@@ -62,6 +63,7 @@ fn to_table(res: &[ls::Entry]) -> String {
     }
 }
 
+#[inline]
 fn to_json(res: &[ls::Entry]) -> Value {
     serde_json::to_value(res).unwrap_or_else(|err| error(err))
 }

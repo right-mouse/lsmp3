@@ -80,7 +80,10 @@ fn list_path(path: PathBuf, options: &ListOptions) -> Result<Info, LsError> {
             artist: tag_string_values(&file.2, "TPE1"),
             album: tag_string_values(&file.2, "TALB"),
             genre: tag_string_values(&file.2, "TCON"),
-            year: file.2.year(),
+            year: file
+                .2
+                .year()
+                .or_else(|| file.2.date_recorded().and_then(|d| Some(d.year))),
             track: Track {
                 number: file.2.track(),
                 total: file.2.total_tracks(),
@@ -100,6 +103,7 @@ fn tag_string_values(tag: &id3::Tag, frame_id: &str) -> Vec<String> {
     tag.text_values_for_frame_id(frame_id)
         .unwrap_or_default()
         .iter()
+        .filter(|s| !s.is_empty())
         .map(|s| s.to_string())
         .collect()
 }

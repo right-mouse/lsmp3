@@ -15,6 +15,7 @@ pub enum SortBy {
 }
 
 /// Performs a case insensitive comparison.
+#[inline]
 fn cmp_vec_string(a: &Vec<String>, b: &Vec<String>) -> Ordering {
     a.iter()
         .map(|s| s.to_lowercase())
@@ -22,6 +23,7 @@ fn cmp_vec_string(a: &Vec<String>, b: &Vec<String>) -> Ordering {
 }
 
 /// Compares the given key for an entry.
+#[inline]
 fn cmp_entry_key(a: &Entry, b: &Entry, key: &SortBy) -> Ordering {
     match key {
         SortBy::FileName => a.file_name.cmp(&b.file_name),
