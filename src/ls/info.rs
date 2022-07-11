@@ -23,30 +23,24 @@ fn display_option_i32(op_i32: &Option<i32>) -> String {
     }
 }
 
-fn display_option_vec_string(op_vec_str: &Option<Vec<String>>) -> String {
-    match *op_vec_str {
-        Some(ref v) => v.join("/"),
-        None => Default::default(),
-    }
+fn display_vec_string(v: &Vec<String>) -> String {
+    v.join("/")
 }
 
-fn serialize_option_vec_string<S>(op_vec_str: &Option<Vec<String>>, s: S) -> Result<S::Ok, S::Error>
+fn serialize_vec_string<S>(v: &Vec<String>, s: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {
-    match *op_vec_str {
-        Some(ref v) => {
-            if v.len() == 1 {
-                s.serialize_str(&v[0])
-            } else {
-                let mut seq = s.serialize_seq(Some(v.len()))?;
-                for e in v {
-                    seq.serialize_element(e)?;
-                }
-                seq.end()
+    match v.len() {
+        0 => s.serialize_none(),
+        1 => s.serialize_str(&v[0]),
+        len => {
+            let mut seq = s.serialize_seq(Some(len))?;
+            for e in v {
+                seq.serialize_element(e)?;
             }
+            seq.end()
         }
-        None => s.serialize_none(),
     }
 }
 
@@ -117,22 +111,22 @@ pub struct Entry {
     pub file_size: u64,
 
     #[tabled(rename = "TITLE")]
-    #[tabled(display_with = "display_option_vec_string")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(serialize_with = "serialize_option_vec_string")]
-    pub title: Option<Vec<String>>,
+    #[tabled(display_with = "display_vec_string")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(serialize_with = "serialize_vec_string")]
+    pub title: Vec<String>,
 
     #[tabled(rename = "ARTIST")]
-    #[tabled(display_with = "display_option_vec_string")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(serialize_with = "serialize_option_vec_string")]
-    pub artist: Option<Vec<String>>,
+    #[tabled(display_with = "display_vec_string")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(serialize_with = "serialize_vec_string")]
+    pub artist: Vec<String>,
 
     #[tabled(rename = "ALBUM")]
-    #[tabled(display_with = "display_option_vec_string")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(serialize_with = "serialize_option_vec_string")]
-    pub album: Option<Vec<String>>,
+    #[tabled(display_with = "display_vec_string")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(serialize_with = "serialize_vec_string")]
+    pub album: Vec<String>,
 
     #[tabled(rename = "YEAR")]
     #[tabled(display_with = "display_option_i32")]
@@ -145,8 +139,8 @@ pub struct Entry {
     pub track: Track,
 
     #[tabled(rename = "GENRE")]
-    #[tabled(display_with = "display_option_vec_string")]
-    #[serde(skip_serializing_if = "Option::is_none")]
-    #[serde(serialize_with = "serialize_option_vec_string")]
-    pub genre: Option<Vec<String>>,
+    #[tabled(display_with = "display_vec_string")]
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(serialize_with = "serialize_vec_string")]
+    pub genre: Vec<String>,
 }

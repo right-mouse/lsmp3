@@ -76,22 +76,10 @@ fn list_path(path: PathBuf, options: &ListOptions) -> Result<Info, LsError> {
         .map(|file| Entry {
             file_name: file.0,
             file_size: file.1,
-            title: file
-                .2
-                .text_values_for_frame_id("TIT2")
-                .map(|v| v.iter().map(|s| s.to_string()).collect()),
-            artist: file
-                .2
-                .text_values_for_frame_id("TPE1")
-                .map(|v| v.iter().map(|s| s.to_string()).collect()),
-            album: file
-                .2
-                .text_values_for_frame_id("TALB")
-                .map(|v| v.iter().map(|s| s.to_string()).collect()),
-            genre: file
-                .2
-                .text_values_for_frame_id("TCON")
-                .map(|v| v.iter().map(|s| s.to_string()).collect()),
+            title: tag_string_values(&file.2, "TIT2"),
+            artist: tag_string_values(&file.2, "TPE1"),
+            album: tag_string_values(&file.2, "TALB"),
+            genre: tag_string_values(&file.2, "TCON"),
             year: file.2.year(),
             track: Track {
                 number: file.2.track(),
@@ -105,4 +93,13 @@ fn list_path(path: PathBuf, options: &ListOptions) -> Result<Info, LsError> {
         entries,
         path_type,
     })
+}
+
+#[inline]
+fn tag_string_values(tag: &id3::Tag, frame_id: &str) -> Vec<String> {
+    tag.text_values_for_frame_id(frame_id)
+        .unwrap_or_default()
+        .iter()
+        .map(|s| s.to_string())
+        .collect()
 }
