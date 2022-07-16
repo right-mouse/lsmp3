@@ -1,5 +1,6 @@
 [package]
 name = "lsmp3"
+description = "List MP3s with title, artist, album, year, track and genre metadata."
 version = "0.1.0"
 edition = "2021"
 

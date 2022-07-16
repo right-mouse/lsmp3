@@ -1,10 +1,18 @@
 use std::{error::Error, ffi::OsString, fmt, io};
 
+/// The error type for listing MP3 operations.
 #[derive(Debug)]
 pub enum LsError {
+    /// The specified path was invalid.
     InvalidPath(OsString),
+
+    /// An MP3 file was unable to be read or parsed.
     Id3Error(OsString, id3::Error),
+
+    /// The current working directory was unable to be read.
     IoCwdError(io::Error),
+
+    /// A file was unable to be read.
     IoReadError(OsString, io::Error),
 }
 

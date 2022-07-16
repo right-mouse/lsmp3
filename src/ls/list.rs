@@ -2,10 +2,14 @@ use super::*;
 use id3::TagLike;
 use std::{ffi::OsString, fs, path::PathBuf};
 
+/// The options for listing MP3s.
 pub struct ListOptions<'a> {
+    /// The list of properties to sort by, in order of priority.
     pub sort_by: &'a [SortBy],
 }
 
+/// Lists MP3s for all the given paths. The paths can be either files or directories. If no paths are provided, the
+/// current working directory is used.
 pub fn list(paths: &Vec<String>, options: &ListOptions) -> Result<Vec<Info>, LsError> {
     if paths.len() == 0 {
         let path = std::env::current_dir().map_err(|err| LsError::IoCwdError(err))?;
@@ -77,13 +81,13 @@ fn list_path(path: PathBuf, options: &ListOptions) -> Result<Info, LsError> {
             file_name: file.0,
             file_size: file.1,
             title: tag_string_values(&file.2, "TIT2"),
+            title_sort_order: tag_option_string_values(&file.2, "TSOT"),
             artist: tag_string_values(&file.2, "TPE1"),
+            artist_sort_order: tag_option_string_values(&file.2, "TSOP"),
             album: tag_string_values(&file.2, "TALB"),
+            album_sort_order: tag_option_string_values(&file.2, "TSOA"),
             genre: tag_string_values(&file.2, "TCON"),
-            year: file
-                .2
-                .year()
-                .or_else(|| file.2.date_recorded().and_then(|d| Some(d.year))),
+            year: file.2.year().or_else(|| file.2.date_recorded().map(|d| d.year)),
             track: Track {
                 number: file.2.track(),
                 total: file.2.total_tracks(),
@@ -93,17 +97,18 @@ fn list_path(path: PathBuf, options: &ListOptions) -> Result<Info, LsError> {
     entries.sort_unstable_by(|a, b| cmp_entry(a, b, options.sort_by));
     Ok(Info {
         path: path.to_string_lossy().to_string(),
-        entries,
         path_type,
+        entries,
     })
 }
 
 #[inline]
 fn tag_string_values(tag: &id3::Tag, frame_id: &str) -> Vec<String> {
+    tag_option_string_values(tag, frame_id).unwrap_or_default()
+}
+
+#[inline]
+fn tag_option_string_values(tag: &id3::Tag, frame_id: &str) -> Option<Vec<String>> {
     tag.text_values_for_frame_id(frame_id)
-        .unwrap_or_default()
-        .iter()
-        .filter(|s| !s.is_empty())
-        .map(|s| s.to_string())
-        .collect()
+        .map(|v| v.into_iter().filter(|s| !s.is_empty()).map(|s| s.to_string()).collect())
 }

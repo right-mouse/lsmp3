@@ -1,9 +1,16 @@
+#![warn(missing_docs)]
+
+//! List MP3s with title, artist, album, year, track and genre metadata.
+//!
+//! Works similar to `ls`, but ignores all files that are not MP3s with valid ID3 tags. Various options are provided for
+//! sorting. In addition to a human readable table format, JSON output is also supported.
+
 use clap::{clap_derive::ArgEnum, CommandFactory, Parser};
 use serde_json::{json, Value};
 use std::{error::Error, io::Write};
 use tabled::Table;
 
-mod ls;
+pub mod ls;
 
 fn capitalize_first_letter(s: &str) -> String {
     s[0..1].to_uppercase() + &s[1..]
