@@ -6,14 +6,11 @@ pub enum LsError {
     /// The specified path was invalid.
     InvalidPath(OsString),
 
-    /// An MP3 file was unable to be read or parsed.
-    Id3Error(OsString, id3::Error),
-
-    /// The current working directory was unable to be read.
-    IoCwdError(io::Error),
-
     /// A file was unable to be read.
     IoReadError(OsString, io::Error),
+
+    /// An MP3 file was unable to be read or parsed.
+    Id3Error(OsString, id3::Error),
 }
 
 impl fmt::Display for LsError {
@@ -23,6 +20,8 @@ impl fmt::Display for LsError {
             "{}",
             match self {
                 LsError::InvalidPath(path) => format!("cannot access {:?}: no such file or directory", path),
+                LsError::IoReadError(file, err) =>
+                    format!("attempting to read {:?} resulted in an error: {}", file, err),
                 LsError::Id3Error(file, err) => format!(
                     "attempting to read {:?} resulted in an error: {}",
                     file,
@@ -31,12 +30,6 @@ impl fmt::Display for LsError {
                         _ => format!("{}", err),
                     }
                 ),
-                LsError::IoCwdError(err) => format!(
-                    "attempting to get current working directory resulted in an error: {}",
-                    err,
-                ),
-                LsError::IoReadError(file, err) =>
-                    format!("attempting to read {:?} resulted in an error: {}", file, err),
             }
         )
     }
@@ -46,12 +39,11 @@ impl Error for LsError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match *self {
             LsError::InvalidPath(_) => None,
+            LsError::IoReadError(_, ref err) => Some(err),
             LsError::Id3Error(_, ref err) => match err.kind {
                 id3::ErrorKind::Io(ref err) => Some(err),
                 _ => Some(err),
             },
-            LsError::IoCwdError(ref err) => Some(err),
-            LsError::IoReadError(_, ref err) => Some(err),
         }
     }
 }

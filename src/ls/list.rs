@@ -12,8 +12,7 @@ pub struct ListOptions<'a> {
 /// current working directory is used.
 pub fn list(paths: &Vec<String>, options: &ListOptions) -> Result<Vec<Info>, LsError> {
     if paths.len() == 0 {
-        let path = std::env::current_dir().map_err(|err| LsError::IoCwdError(err))?;
-        Ok(vec![list_path(path, options)?])
+        list_path(PathBuf::from("."), options).map(|l| vec![l])
     } else {
         paths
             .iter()
