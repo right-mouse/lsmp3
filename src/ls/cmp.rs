@@ -67,8 +67,5 @@ pub fn cmp_entry(a: &Entry, b: &Entry, keys: &[SortBy]) -> Ordering {
     if keys.is_empty() {
         return Ordering::Equal;
     }
-    match cmp_entry_key(a, b, &keys[0]) {
-        Ordering::Equal => cmp_entry(a, b, &keys[1..]),
-        other => other,
-    }
+    cmp_entry_key(a, b, &keys[0]).then_with(|| cmp_entry(a, b, &keys[1..]))
 }

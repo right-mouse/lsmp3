@@ -1,32 +1,43 @@
 use super::*;
-use id3::TagLike;
-use std::{ffi::OsString, fs, path::PathBuf};
+use id3::{Tag, TagLike};
+use itertools::{Either, Itertools};
+use std::{ffi::OsString, fs, iter, path::PathBuf};
 
 /// The options for listing MP3s.
 pub struct ListOptions<'a> {
     /// The list of properties to sort by, in order of priority.
     pub sort_by: &'a [SortBy],
+    /// Whether to reverse the order while sorting.
+    pub reverse: &'a bool,
+    /// Whether to list subdirectories recursively.
+    pub recursive: &'a bool,
 }
 
 /// Lists MP3s for all the given paths. The paths can be either files or directories. If no paths are provided, the
 /// current working directory is used.
 pub fn list(paths: &Vec<String>, options: &ListOptions) -> Result<Vec<Info>, LsError> {
     if paths.len() == 0 {
-        list_path(PathBuf::from("."), options).map(|l| vec![l])
+        list_path(PathBuf::from("."), options)
     } else {
         paths
             .iter()
             .map(|p| list_path(PathBuf::from(p), options))
             .collect::<Result<Vec<_>, _>>()
+            .map(|v| v.into_iter().flatten().collect())
     }
 }
 
-fn list_path(path: PathBuf, options: &ListOptions) -> Result<Info, LsError> {
+fn list_path(path: PathBuf, options: &ListOptions) -> Result<Vec<Info>, LsError> {
     if !path.is_dir() && !path.is_file() {
         return Err(LsError::InvalidPath(path.into_os_string()));
     }
 
-    let (path_type, files) = if path.is_dir() {
+    enum WalkEntry {
+        File(OsString, u64, Tag),
+        Dir(PathBuf),
+    }
+
+    let (path_type, walk_entries) = if path.is_dir() {
         // If the given path is a directory, walk through it and attempt to parse all files. Assume the ones that fail
         // to parse aren't mp3 files and skip them.
         (
@@ -40,7 +51,7 @@ fn list_path(path: PathBuf, options: &ListOptions) -> Result<Info, LsError> {
                             if file_type.is_file() {
                                 match dir_entry.metadata() {
                                     Ok(meta) => match id3::Tag::read_from_path(dir_entry.path()) {
-                                        Ok(tag) => Some(Ok((dir_entry.file_name(), meta.len(), tag))),
+                                        Ok(tag) => Some(Ok(WalkEntry::File(dir_entry.file_name(), meta.len(), tag))),
                                         Err(err) => match err.kind {
                                             id3::ErrorKind::Io(err) => {
                                                 Some(Err(LsError::IoReadError(dir_entry.path().into_os_string(), err)))
@@ -49,6 +60,12 @@ fn list_path(path: PathBuf, options: &ListOptions) -> Result<Info, LsError> {
                                         },
                                     },
                                     Err(err) => Some(Err(LsError::IoReadError(dir_entry.path().into_os_string(), err))),
+                                }
+                            } else if file_type.is_dir() {
+                                if *options.recursive {
+                                    Some(Ok(WalkEntry::Dir(dir_entry.path())))
+                                } else {
+                                    None
                                 }
                             } else {
                                 None
@@ -64,7 +81,7 @@ fn list_path(path: PathBuf, options: &ListOptions) -> Result<Info, LsError> {
         // If the given path is a file, attempt to parse the file as an mp3.
         (
             PathType::File,
-            vec![(
+            vec![WalkEntry::File(
                 OsString::from(path.file_name().unwrap_or_default()),
                 path.metadata()
                     .map_err(|err| LsError::IoReadError(path.as_os_str().to_owned(), err))?
@@ -73,6 +90,12 @@ fn list_path(path: PathBuf, options: &ListOptions) -> Result<Info, LsError> {
             )],
         )
     };
+
+    let (files, mut subdirs): (Vec<_>, Vec<_>) = walk_entries.into_iter().partition_map(|entry| match entry {
+        WalkEntry::File(name, size, tag) => Either::Left((name, size, tag)),
+        WalkEntry::Dir(path) => Either::Right(path),
+    });
+    subdirs.sort_unstable();
 
     let mut entries: Vec<_> = files
         .into_iter()
@@ -93,12 +116,23 @@ fn list_path(path: PathBuf, options: &ListOptions) -> Result<Info, LsError> {
             },
         })
         .collect();
-    entries.sort_unstable_by(|a, b| cmp_entry(a, b, options.sort_by));
-    Ok(Info {
+    entries.sort_unstable_by(|a, b| {
+        let ord = cmp_entry(a, b, options.sort_by);
+        if *options.reverse {
+            ord.reverse()
+        } else {
+            ord
+        }
+    });
+
+    iter::once(Ok(vec![Info {
         path: path.to_string_lossy().to_string(),
         path_type,
         entries,
-    })
+    }]))
+    .chain(subdirs.into_iter().map(|p| list_path(p, options)))
+    .collect::<Result<Vec<_>, _>>()
+    .map(|v| v.into_iter().flatten().collect())
 }
 
 #[inline]

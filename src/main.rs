@@ -47,6 +47,14 @@ struct Args {
     #[clap(value_parser)]
     format: Format,
 
+    /// Reverse order while sorting
+    #[clap(long = "reverse", short = 'r')]
+    reverse: bool,
+
+    /// List subdirectories recursively
+    #[clap(long = "recursive", short = 'R')]
+    recursive: bool,
+
     /// Sort by WORD (can be set multiple times)
     #[clap(long = "sort", short = 's')]
     #[clap(value_name = "WORD")]
@@ -78,7 +86,15 @@ fn to_json(res: &[ls::Entry]) -> Value {
 fn main() {
     let args = Args::parse();
 
-    let results = ls::list(&args.file, &ls::ListOptions { sort_by: &args.sort_by }).unwrap_or_else(|err| error(err));
+    let results = ls::list(
+        &args.file,
+        &ls::ListOptions {
+            sort_by: &args.sort_by,
+            reverse: &args.reverse,
+            recursive: &args.recursive,
+        },
+    )
+    .unwrap_or_else(|err| error(err));
     let (mut tables, mut values): (Vec<String>, Vec<Value>) = match args.format {
         Format::Table => (Vec::with_capacity(results.len()), Vec::with_capacity(0)),
         Format::JSON => (Vec::with_capacity(0), Vec::with_capacity(results.len())),
@@ -92,7 +108,14 @@ fn main() {
         let (files, dirs): (Vec<_>, Vec<_>) = results.into_iter().partition(|f| f.path_type == ls::PathType::File);
         if !files.is_empty() {
             let mut f = files.into_iter().map(|f| f.entries).flatten().collect::<Vec<_>>();
-            f.sort_unstable_by(|a, b| ls::cmp_entry(a, b, &args.sort_by));
+            f.sort_unstable_by(|a, b| {
+                let ord = ls::cmp_entry(a, b, &args.sort_by);
+                if args.reverse {
+                    ord.reverse()
+                } else {
+                    ord
+                }
+            });
             match args.format {
                 Format::Table => tables.push(to_table(&f)),
                 Format::JSON => values.push(to_json(&f)),
