@@ -6,11 +6,10 @@
 //! sorting. In addition to a human readable table format, JSON output is also supported.
 
 use clap::{clap_derive::ArgEnum, CommandFactory, Parser};
+use lsmp3::ls;
 use serde_json::{json, Value};
 use std::{error::Error, io::Write};
 use tabled::Table;
-
-pub mod ls;
 
 fn capitalize_first_letter(s: &str) -> String {
     s[0..1].to_uppercase() + &s[1..]
