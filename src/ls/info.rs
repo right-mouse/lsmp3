@@ -90,6 +90,7 @@ pub enum PathType {
 }
 
 /// A container for the results of a list operation along with the original path and the path type.
+#[derive(Debug, PartialEq, Eq)]
 pub struct Info {
     /// The path that was listed.
     pub path: String,
@@ -102,7 +103,7 @@ pub struct Info {
 }
 
 /// The track metadata for a file.
-#[derive(PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct Track {
     /// The track number.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -114,7 +115,7 @@ pub struct Track {
 }
 
 /// A result from a list operation.
-#[derive(Serialize, Deserialize, Tabled)]
+#[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Tabled)]
 pub struct Entry {
     /// The name of the file.
     #[tabled(rename = "NAME")]

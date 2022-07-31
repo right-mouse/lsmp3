@@ -1,7 +1,8 @@
 use super::*;
 use id3::TagLike;
 use itertools::{Either, Itertools};
-use std::{ffi::OsString, fs, iter, path::PathBuf};
+use std::{ffi::OsString, iter, path::PathBuf};
+use walkdir::WalkDir;
 
 /// The options for listing MP3s.
 pub struct ListOptions<'a> {
@@ -37,38 +38,43 @@ fn list_path(path: PathBuf, options: &ListOptions) -> Result<Vec<Info>, LsError>
         // to parse aren't mp3 files and skip them.
         (
             PathType::Directory,
-            fs::read_dir(&path)
-                .map_err(|err| LsError::IoReadError(path.as_os_str().to_owned(), err))?
+            WalkDir::new(&path)
+                .max_depth(1)
+                .follow_links(true)
+                .sort_by_file_name()
                 .into_iter()
                 .filter_map(|entry| match entry {
-                    Ok(dir_entry) => match dir_entry.file_type() {
-                        Ok(file_type) => {
-                            if file_type.is_file() {
-                                match dir_entry.metadata() {
-                                    Ok(meta) => match id3::Tag::read_from_path(dir_entry.path()) {
-                                        Ok(tag) => Some(Ok(Either::Left((dir_entry.file_name(), meta.len(), tag)))),
-                                        Err(err) => match err.kind {
-                                            id3::ErrorKind::Io(err) => {
-                                                Some(Err(LsError::IoReadError(dir_entry.path().into_os_string(), err)))
-                                            }
-                                            _ => None, // Assume it's not an mp3 file and skip.
-                                        },
+                    Ok(dir_entry) => {
+                        let file_type = dir_entry.file_type();
+                        if file_type.is_file() {
+                            match dir_entry.metadata() {
+                                Ok(meta) => match id3::Tag::read_from_path(dir_entry.path()) {
+                                    Ok(tag) => {
+                                        Some(Ok(Either::Left((dir_entry.file_name().to_owned(), meta.len(), tag))))
+                                    }
+                                    Err(err) => match err.kind {
+                                        id3::ErrorKind::Io(err) => {
+                                            Some(Err(LsError::IoReadError(dir_entry.into_path().into_os_string(), err)))
+                                        }
+                                        _ => None, // Assume it's not an mp3 file and skip.
                                     },
-                                    Err(err) => Some(Err(LsError::IoReadError(dir_entry.path().into_os_string(), err))),
-                                }
-                            } else if file_type.is_dir() {
-                                if *options.recursive {
-                                    Some(Ok(Either::Right(dir_entry.path())))
-                                } else {
-                                    None
-                                }
+                                },
+                                Err(err) => Some(Err(LsError::IoReadError(
+                                    dir_entry.into_path().into_os_string(),
+                                    err.into(),
+                                ))),
+                            }
+                        } else if file_type.is_dir() {
+                            if *options.recursive && dir_entry.path() != path {
+                                Some(Ok(Either::Right(dir_entry.into_path())))
                             } else {
                                 None
                             }
+                        } else {
+                            None
                         }
-                        Err(err) => Some(Err(LsError::IoReadError(dir_entry.path().into_os_string(), err))),
-                    },
-                    Err(err) => Some(Err(LsError::IoReadError(path.as_os_str().to_owned(), err))),
+                    }
+                    Err(err) => Some(Err(LsError::IoReadError(path.as_os_str().to_owned(), err.into()))),
                 })
                 .collect::<Result<Vec<_>, _>>()?,
         )
