@@ -82,6 +82,107 @@ fn to_json(res: &[ls::Entry]) -> Value {
     serde_json::to_value(res).unwrap_or_else(|err| error(err))
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Creates an owned String or OsString from a string literal.
+    macro_rules! s {
+        ($str:literal) => {
+            $str.into()
+        };
+    }
+
+    fn get_test_entries() -> Vec<ls::Entry> {
+        vec![
+            ls::Entry {
+                file_name: s!("Some.mp3"),
+                file_size: 8080,
+                title: vec![s!("Two"), s!("titles")],
+                title_sort_order: None,
+                artist: vec![s!("Three"), s!("cool"), s!("artists")],
+                artist_sort_order: None,
+                album: vec![s!("Dual"), s!("Album")],
+                album_sort_order: None,
+                year: Some(2020),
+                track: ls::Track {
+                    number: Some(2),
+                    total: Some(3),
+                },
+                genre: vec![s!("Trip-Hop"), s!("Hip-Hop")],
+            },
+            ls::Entry {
+                file_name: s!("None.mp3"),
+                file_size: 42,
+                title: vec![],
+                title_sort_order: None,
+                artist: vec![],
+                artist_sort_order: None,
+                album: vec![],
+                album_sort_order: None,
+                year: None,
+                track: ls::Track {
+                    number: None,
+                    total: None,
+                },
+                genre: vec![],
+            },
+        ]
+    }
+
+    #[test]
+    fn test_to_table() {
+        assert_eq!(
+            to_table(&get_test_entries()),
+            format!(
+                "{}\n{}\n{}\n",
+                " NAME       SIZE      TITLE        ARTIST               ALBUM        YEAR   TRACK   GENRE            ",
+                " Some.mp3   7.9 kiB   Two/titles   Three/cool/artists   Dual/Album   2020   2/3     Trip-Hop/Hip-Hop ",
+                " None.mp3    42 B                                                                                    "
+            )
+        )
+    }
+
+    #[test]
+    fn test_to_json() {
+        assert_eq!(
+            to_json(&get_test_entries()),
+            json!([
+                {
+                    "album": [
+                        "Dual",
+                        "Album"
+                    ],
+                    "artist": [
+                        "Three",
+                        "cool",
+                        "artists"
+                    ],
+                    "file_name": "Some.mp3",
+                    "file_size": 8080,
+                    "genre": [
+                        "Trip-Hop",
+                        "Hip-Hop"
+                    ],
+                    "title": [
+                        "Two",
+                        "titles"
+                    ],
+                    "track": {
+                        "number": 2,
+                        "total": 3
+                    },
+                    "year": 2020
+                },
+                {
+                    "file_name": "None.mp3",
+                    "file_size": 42
+                }
+            ])
+        )
+    }
+}
+
 fn main() {
     let args = Args::parse();
 
