@@ -73,7 +73,7 @@ fn human_readable_size(s: &u64) -> String {
     let e = (*s as f64).log(BASE).floor();
     let suffix = SUFFIXES[e as usize];
     let val = (*s as f64 / BASE.powf(e) * 10.0 + 0.5).floor() / 10.0;
-    format!("{0:3.2$} {1}", val, suffix, if val < 10.0 { 1 } else { 0 })
+    format!("{:3.precision$} {}", val, suffix, precision = usize::from(val < 10.0))
 }
 
 /// The type of a list path.
