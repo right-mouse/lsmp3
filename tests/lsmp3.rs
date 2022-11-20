@@ -1,4 +1,4 @@
-use lsmp3::ls::*;
+use lsmp3::*;
 use std::{env, path::PathBuf};
 
 /// Creates an owned String or OsString from a string literal.
@@ -24,14 +24,14 @@ fn test_list_single_file() {
         list(
             &vec![path.clone()],
             &ListOptions {
-                sort_by: &vec![SortBy::FileName],
+                sort_by: &[SortBy::FileName],
                 reverse: &false,
                 recursive: &false,
             }
         )
         .unwrap(),
         vec![Info {
-            path: path,
+            path,
             path_type: PathType::File,
             entries: vec![Entry {
                 file_name: s!("id3v24_most_tags.mp3"),
@@ -65,14 +65,14 @@ fn test_list_symlink_file() {
         list(
             &vec![path.clone()],
             &ListOptions {
-                sort_by: &vec![SortBy::FileName],
+                sort_by: &[SortBy::FileName],
                 reverse: &false,
                 recursive: &false,
             }
         )
         .unwrap(),
         vec![Info {
-            path: path,
+            path,
             path_type: PathType::File,
             entries: vec![Entry {
                 file_name: s!("id3v24_most_tags.mp3"),
@@ -112,7 +112,7 @@ fn test_list_multiple_files() {
         list(
             &vec![path1.clone(), path2.clone()],
             &ListOptions {
-                sort_by: &vec![SortBy::FileName],
+                sort_by: &[SortBy::FileName],
                 reverse: &false,
                 recursive: &false,
             }
@@ -173,7 +173,7 @@ fn test_list_invalid_file() {
                 .into_string()
                 .unwrap()],
             &ListOptions {
-                sort_by: &vec![SortBy::FileName],
+                sort_by: &[SortBy::FileName],
                 reverse: &false,
                 recursive: &false,
             },
@@ -195,14 +195,14 @@ fn test_list_dir() {
         list(
             &vec![path.clone()],
             &ListOptions {
-                sort_by: &vec![SortBy::FileName],
+                sort_by: &[SortBy::FileName],
                 reverse: &false,
                 recursive: &false,
             }
         )
         .unwrap(),
         vec![Info {
-            path: path,
+            path,
             path_type: PathType::Directory,
             entries: vec![
                 Entry {
@@ -285,14 +285,14 @@ fn test_list_symlink_dir() {
         list(
             &vec![path.clone()],
             &ListOptions {
-                sort_by: &vec![SortBy::FileName],
+                sort_by: &[SortBy::FileName],
                 reverse: &false,
                 recursive: &false,
             }
         )
         .unwrap(),
         vec![Info {
-            path: path,
+            path,
             path_type: PathType::Directory,
             entries: vec![
                 Entry {
@@ -381,7 +381,7 @@ fn test_list_multiple_dirs() {
     let results = list(
         &vec![path1.clone(), path2.clone()],
         &ListOptions {
-            sort_by: &vec![SortBy::FileName],
+            sort_by: &[SortBy::FileName],
             reverse: &false,
             recursive: &false,
         },
@@ -412,7 +412,7 @@ fn test_list_cwd() {
         list(
             &vec![],
             &ListOptions {
-                sort_by: &vec![SortBy::FileName],
+                sort_by: &[SortBy::FileName],
                 reverse: &false,
                 recursive: &false,
             },
@@ -568,7 +568,7 @@ fn test_list_dir_recursive() {
     let results = list(
         &vec![path.clone()],
         &ListOptions {
-            sort_by: &vec![SortBy::FileName],
+            sort_by: &[SortBy::FileName],
             reverse: &false,
             recursive: &true,
         },
@@ -619,7 +619,7 @@ fn test_order_reverse() {
     let results = list(
         &vec![path.clone()],
         &ListOptions {
-            sort_by: &vec![SortBy::FileName],
+            sort_by: &[SortBy::FileName],
             reverse: &true,
             recursive: &false,
         },
@@ -646,7 +646,7 @@ fn test_order_by_multiple_fields() {
     let results = list(
         &vec![path.clone()],
         &ListOptions {
-            sort_by: &vec![SortBy::Album, SortBy::Title, SortBy::Track, SortBy::FileName],
+            sort_by: &[SortBy::Album, SortBy::Title, SortBy::Track, SortBy::FileName],
             reverse: &false,
             recursive: &false,
         },

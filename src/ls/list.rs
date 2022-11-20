@@ -17,7 +17,7 @@ pub struct ListOptions<'a> {
 /// Lists MP3s for all the given paths. The paths can be either files or directories. If no paths are provided, the
 /// current working directory is used.
 pub fn list(paths: &Vec<String>, options: &ListOptions) -> Result<Vec<Info>, LsError> {
-    if paths.len() == 0 {
+    if paths.is_empty() {
         list_path(PathBuf::from("."), options)
     } else {
         paths
