@@ -71,7 +71,7 @@ fn human_readable_size(s: &u64) -> String {
     const SUFFIXES: &'static [&'static str] = &["B", "kiB", "MiB", "GiB", "TiB", "PiB", "EiB"];
     const BASE: f64 = 1024.0;
     if *s < 10 {
-        return format!("{} {}", s, SUFFIXES[0]);
+        return format!("{:3} {}", s, SUFFIXES[0]);
     }
     let e = (*s as f64).log(BASE).floor();
     let suffix = SUFFIXES[e as usize];

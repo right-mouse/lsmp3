@@ -176,7 +176,7 @@ mod tests {
             },
             ls::Entry {
                 file_name: s!("None.mp3"),
-                file_size: 42,
+                file_size: 4,
                 title: vec![],
                 title_sort_order: None,
                 artist: vec![],
@@ -201,7 +201,7 @@ mod tests {
                 "{}\n{}\n{}\n",
                 " NAME       SIZE      TITLE        ARTIST               ALBUM        YEAR   TRACK   GENRE            ",
                 " Some.mp3   7.9 kiB   Two/titles   Three/cool/artists   Dual/Album   2020   2/3     Trip-Hop/Hip-Hop ",
-                " None.mp3    42 B                                                                                    "
+                " None.mp3     4 B                                                                                    "
             )
         )
     }
@@ -239,7 +239,7 @@ mod tests {
                 },
                 {
                     "file_name": "None.mp3",
-                    "file_size": 42
+                    "file_size": 4
                 }
             ])
         )
