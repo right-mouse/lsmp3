@@ -6,11 +6,11 @@
 //! sorting. In addition to a human readable table format, JSON output is also supported.
 
 use clap::{clap_derive::ArgEnum, CommandFactory, Parser, ValueHint};
-use lsmp3::ls;
 use serde_json::{json, Value};
 use std::{error::Error, io::Write};
 use tabled::Table;
 
+#[inline]
 fn capitalize_first_letter(s: &str) -> String {
     s[0..1].to_uppercase() + &s[1..]
 }
@@ -27,7 +27,7 @@ fn error(err: impl Error) -> ! {
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ArgEnum)]
 enum Format {
     Table,
-    JSON,
+    Json,
 }
 
 #[derive(Debug, Parser)]
@@ -59,11 +59,11 @@ struct Args {
     #[clap(multiple = true)]
     #[clap(number_of_values = 1)]
     #[clap(default_value = "file-name")]
-    sort_by: Vec<ls::SortBy>,
+    sort_by: Vec<lsmp3::SortBy>,
 }
 
 #[inline]
-fn to_table(res: &[ls::Entry]) -> String {
+fn to_table(res: &[lsmp3::Entry]) -> String {
     if res.is_empty() {
         Default::default()
     } else {
@@ -76,16 +76,16 @@ fn to_table(res: &[ls::Entry]) -> String {
 }
 
 #[inline]
-fn to_json(res: &[ls::Entry]) -> Value {
+fn to_json(res: &[lsmp3::Entry]) -> Value {
     serde_json::to_value(res).unwrap_or_else(|err| error(err))
 }
 
 fn main() {
     let args = Args::parse();
 
-    let results = ls::list(
+    let results = lsmp3::list(
         &args.file,
-        &ls::ListOptions {
+        &lsmp3::ListOptions {
             sort_by: &args.sort_by,
             reverse: &args.reverse,
             recursive: &args.recursive,
@@ -94,19 +94,19 @@ fn main() {
     .unwrap_or_else(|err| error(err));
     let (mut tables, mut values): (Vec<String>, Vec<Value>) = match args.format {
         Format::Table => (Vec::with_capacity(results.len()), Vec::with_capacity(0)),
-        Format::JSON => (Vec::with_capacity(0), Vec::with_capacity(results.len())),
+        Format::Json => (Vec::with_capacity(0), Vec::with_capacity(results.len())),
     };
     if results.len() == 1 {
         match args.format {
             Format::Table => tables.push(to_table(&results[0].entries)),
-            Format::JSON => values.push(to_json(&results[0].entries)),
+            Format::Json => values.push(to_json(&results[0].entries)),
         }
     } else {
-        let (files, dirs): (Vec<_>, Vec<_>) = results.into_iter().partition(|f| f.path_type == ls::PathType::File);
+        let (files, dirs): (Vec<_>, Vec<_>) = results.into_iter().partition(|f| f.path_type == lsmp3::PathType::File);
         if !files.is_empty() {
-            let mut f = files.into_iter().map(|f| f.entries).flatten().collect::<Vec<_>>();
+            let mut f = files.into_iter().flat_map(|f| f.entries).collect::<Vec<_>>();
             f.sort_unstable_by(|a, b| {
-                let ord = ls::cmp_entry(a, b, &args.sort_by);
+                let ord = lsmp3::cmp_entry(a, b, &args.sort_by);
                 if args.reverse {
                     ord.reverse()
                 } else {
@@ -115,13 +115,13 @@ fn main() {
             });
             match args.format {
                 Format::Table => tables.push(to_table(&f)),
-                Format::JSON => values.push(to_json(&f)),
+                Format::Json => values.push(to_json(&f)),
             }
         }
         if !dirs.is_empty() {
             match args.format {
                 Format::Table => tables.extend(dirs.iter().map(|f| format!("{}:\n{}", f.path, to_table(&f.entries)))),
-                Format::JSON => values.extend(dirs.iter().map(|f| {
+                Format::Json => values.extend(dirs.iter().map(|f| {
                     json!({
                         "path": f.path,
                         "values": to_json(&f.entries),
@@ -135,7 +135,7 @@ fn main() {
         "{}",
         match args.format {
             Format::Table => tables.join("\n"),
-            Format::JSON => if values.len() == 1 {
+            Format::Json => if values.len() == 1 {
                 serde_json::to_string(&values[0])
             } else {
                 serde_json::to_string(&values)
@@ -156,9 +156,9 @@ mod tests {
         };
     }
 
-    fn get_test_entries() -> Vec<ls::Entry> {
+    fn get_test_entries() -> Vec<lsmp3::Entry> {
         vec![
-            ls::Entry {
+            lsmp3::Entry {
                 file_name: s!("Some.mp3"),
                 file_size: 8080,
                 title: vec![s!("Two"), s!("titles")],
@@ -168,13 +168,13 @@ mod tests {
                 album: vec![s!("Dual"), s!("Album")],
                 album_sort_order: None,
                 year: Some(2020),
-                track: ls::Track {
+                track: lsmp3::Track {
                     number: Some(2),
                     total: Some(3),
                 },
                 genre: vec![s!("Trip-Hop"), s!("Hip-Hop")],
             },
-            ls::Entry {
+            lsmp3::Entry {
                 file_name: s!("None.mp3"),
                 file_size: 4,
                 title: vec![],
@@ -184,7 +184,7 @@ mod tests {
                 album: vec![],
                 album_sort_order: None,
                 year: None,
-                track: ls::Track {
+                track: lsmp3::Track {
                     number: None,
                     total: None,
                 },

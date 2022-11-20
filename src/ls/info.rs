@@ -23,7 +23,7 @@ fn display_option_i32(op_i32: &Option<i32>) -> String {
     }
 }
 
-fn display_vec_string(v: &Vec<String>) -> String {
+fn display_vec_string(v: &[String]) -> String {
     v.join("/")
 }
 
@@ -48,12 +48,9 @@ fn display_track(track: &Track) -> String {
     match track.number {
         Some(n) => {
             let mut s = n.to_string();
-            match track.total {
-                Some(t) => {
-                    s.push_str("/");
-                    s.push_str(&t.to_string());
-                }
-                _ => {}
+            if let Some(t) = track.total {
+                s.push('/');
+                s.push_str(&t.to_string());
             }
             s
         }
@@ -68,7 +65,7 @@ fn is_track_empty(track: &Track) -> bool {
 /// Converts a size to a human readable size. Borrowed from https://github.com/dustin/go-humanize, licensed under the
 /// MIT license.
 fn human_readable_size(s: &u64) -> String {
-    const SUFFIXES: &'static [&'static str] = &["B", "kiB", "MiB", "GiB", "TiB", "PiB", "EiB"];
+    const SUFFIXES: &[&str] = &["B", "kiB", "MiB", "GiB", "TiB", "PiB", "EiB"];
     const BASE: f64 = 1024.0;
     if *s < 10 {
         return format!("{:3} {}", s, SUFFIXES[0]);

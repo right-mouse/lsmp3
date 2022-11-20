@@ -2,4 +2,6 @@
 
 //! List MP3s with title, artist, album, year, track and genre metadata.
 
-pub mod ls;
+mod ls;
+
+pub use ls::*;
