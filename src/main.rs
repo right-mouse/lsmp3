@@ -58,7 +58,7 @@ struct Args {
     #[clap(arg_enum)]
     #[clap(multiple = true)]
     #[clap(number_of_values = 1)]
-    #[clap(default_value = "file-name")]
+    #[clap(default_value = "name")]
     sort_by: Vec<lsmp3::SortBy>,
 }
 
@@ -159,8 +159,8 @@ mod tests {
     fn get_test_entries() -> Vec<lsmp3::Entry> {
         vec![
             lsmp3::Entry {
-                file_name: s!("Some.mp3"),
-                file_size: 8080,
+                name: s!("Some.mp3"),
+                size: 8080,
                 title: vec![s!("Two"), s!("titles")],
                 title_sort_order: None,
                 artist: vec![s!("Three"), s!("cool"), s!("artists")],
@@ -175,8 +175,8 @@ mod tests {
                 genre: vec![s!("Trip-Hop"), s!("Hip-Hop")],
             },
             lsmp3::Entry {
-                file_name: s!("None.mp3"),
-                file_size: 4,
+                name: s!("None.mp3"),
+                size: 4,
                 title: vec![],
                 title_sort_order: None,
                 artist: vec![],
@@ -221,8 +221,8 @@ mod tests {
                         "cool",
                         "artists"
                     ],
-                    "file_name": "Some.mp3",
-                    "file_size": 8080,
+                    "name": "Some.mp3",
+                    "size": 8080,
                     "genre": [
                         "Trip-Hop",
                         "Hip-Hop"
@@ -238,8 +238,8 @@ mod tests {
                     "year": 2020
                 },
                 {
-                    "file_name": "None.mp3",
-                    "file_size": 4
+                    "name": "None.mp3",
+                    "size": 4
                 }
             ])
         )

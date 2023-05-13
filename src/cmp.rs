@@ -6,10 +6,10 @@ use std::cmp::Ordering;
 #[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ArgEnum)]
 pub enum SortBy {
     /// Sort by file name.
-    FileName,
+    Name,
 
     /// Sort by file size.
-    FileSize,
+    Size,
 
     /// Sort by track title.
     Title,
@@ -50,8 +50,8 @@ fn cmp_vec_string(
 #[inline]
 fn cmp_entry_key(a: &Entry, b: &Entry, key: &SortBy) -> Ordering {
     match key {
-        SortBy::FileName => a.file_name.cmp(&b.file_name),
-        SortBy::FileSize => a.file_size.cmp(&b.file_size),
+        SortBy::Name => a.name.cmp(&b.name),
+        SortBy::Size => a.size.cmp(&b.size),
         SortBy::Title => cmp_vec_string(&a.title, &b.title, &a.title_sort_order, &b.title_sort_order),
         SortBy::Artist => cmp_vec_string(&a.artist, &b.artist, &a.artist_sort_order, &b.artist_sort_order),
         SortBy::Album => cmp_vec_string(&a.album, &b.album, &a.album_sort_order, &b.album_sort_order),

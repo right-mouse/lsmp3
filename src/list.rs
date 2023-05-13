@@ -98,8 +98,8 @@ fn list_path(path: PathBuf, options: &ListOptions) -> Result<Vec<Info>, LsError>
     let mut entries: Vec<_> = files
         .into_iter()
         .map(|file| Entry {
-            file_name: file.0,
-            file_size: file.1,
+            name: file.0,
+            size: file.1,
             title: tag_string_values(&file.2, "TIT2"),
             title_sort_order: tag_option_string_values(&file.2, "TSOT"),
             artist: tag_string_values(&file.2, "TPE1"),

@@ -24,7 +24,7 @@ fn test_list_single_file() {
         list(
             &vec![path.clone()],
             &ListOptions {
-                sort_by: &[SortBy::FileName],
+                sort_by: &[SortBy::Name],
                 reverse: &false,
                 recursive: &false,
             }
@@ -34,8 +34,8 @@ fn test_list_single_file() {
             path,
             path_type: PathType::File,
             entries: vec![Entry {
-                file_name: s!("id3v24_most_tags.mp3"),
-                file_size: 23017,
+                name: s!("id3v24_most_tags.mp3"),
+                size: 23017,
                 title: vec![s!("Best Song Ever")],
                 title_sort_order: None,
                 artist: vec![s!("Someone")],
@@ -65,7 +65,7 @@ fn test_list_symlink_file() {
         list(
             &vec![path.clone()],
             &ListOptions {
-                sort_by: &[SortBy::FileName],
+                sort_by: &[SortBy::Name],
                 reverse: &false,
                 recursive: &false,
             }
@@ -75,8 +75,8 @@ fn test_list_symlink_file() {
             path,
             path_type: PathType::File,
             entries: vec![Entry {
-                file_name: s!("id3v24_most_tags.mp3"),
-                file_size: 23017,
+                name: s!("id3v24_most_tags.mp3"),
+                size: 23017,
                 title: vec![s!("Best Song Ever")],
                 title_sort_order: None,
                 artist: vec![s!("Someone")],
@@ -112,7 +112,7 @@ fn test_list_multiple_files() {
         list(
             &vec![path1.clone(), path2.clone()],
             &ListOptions {
-                sort_by: &[SortBy::FileName],
+                sort_by: &[SortBy::Name],
                 reverse: &false,
                 recursive: &false,
             }
@@ -123,8 +123,8 @@ fn test_list_multiple_files() {
                 path: path1,
                 path_type: PathType::File,
                 entries: vec![Entry {
-                    file_name: s!("id3v23_most_tags.mp3"),
-                    file_size: 22993,
+                    name: s!("id3v23_most_tags.mp3"),
+                    size: 22993,
                     title: vec![s!("Best Song Ever")],
                     title_sort_order: None,
                     artist: vec![s!("Someone")],
@@ -143,8 +143,8 @@ fn test_list_multiple_files() {
                 path: path2,
                 path_type: PathType::File,
                 entries: vec![Entry {
-                    file_name: s!("id3v24_most_tags.mp3"),
-                    file_size: 23017,
+                    name: s!("id3v24_most_tags.mp3"),
+                    size: 23017,
                     title: vec![s!("Best Song Ever")],
                     title_sort_order: None,
                     artist: vec![s!("Someone")],
@@ -173,7 +173,7 @@ fn test_list_invalid_file() {
                 .into_string()
                 .unwrap()],
             &ListOptions {
-                sort_by: &[SortBy::FileName],
+                sort_by: &[SortBy::Name],
                 reverse: &false,
                 recursive: &false,
             },
@@ -195,7 +195,7 @@ fn test_list_dir() {
         list(
             &vec![path.clone()],
             &ListOptions {
-                sort_by: &[SortBy::FileName],
+                sort_by: &[SortBy::Name],
                 reverse: &false,
                 recursive: &false,
             }
@@ -206,8 +206,8 @@ fn test_list_dir() {
             path_type: PathType::Directory,
             entries: vec![
                 Entry {
-                    file_name: s!("id3v23_most_tags.mp3"),
-                    file_size: 22993,
+                    name: s!("id3v23_most_tags.mp3"),
+                    size: 22993,
                     title: vec![s!("Best Song Ever")],
                     title_sort_order: None,
                     artist: vec![s!("Someone")],
@@ -222,8 +222,8 @@ fn test_list_dir() {
                     genre: vec![s!("Pop")]
                 },
                 Entry {
-                    file_name: s!("id3v23_some_tags.mp3"),
-                    file_size: 22993,
+                    name: s!("id3v23_some_tags.mp3"),
+                    size: 22993,
                     title: vec![s!("Best Song Ever")],
                     title_sort_order: None,
                     artist: vec![s!("Someone")],
@@ -238,8 +238,8 @@ fn test_list_dir() {
                     genre: vec![]
                 },
                 Entry {
-                    file_name: s!("id3v24_most_tags.mp3"),
-                    file_size: 23017,
+                    name: s!("id3v24_most_tags.mp3"),
+                    size: 23017,
                     title: vec![s!("Best Song Ever")],
                     title_sort_order: None,
                     artist: vec![s!("Someone")],
@@ -254,8 +254,8 @@ fn test_list_dir() {
                     genre: vec![s!("Pop")]
                 },
                 Entry {
-                    file_name: s!("id3v24_some_tags.mp3"),
-                    file_size: 23017,
+                    name: s!("id3v24_some_tags.mp3"),
+                    size: 23017,
                     title: vec![s!("Best Song Ever")],
                     title_sort_order: None,
                     artist: vec![s!("Someone")],
@@ -285,7 +285,7 @@ fn test_list_symlink_dir() {
         list(
             &vec![path.clone()],
             &ListOptions {
-                sort_by: &[SortBy::FileName],
+                sort_by: &[SortBy::Name],
                 reverse: &false,
                 recursive: &false,
             }
@@ -296,8 +296,8 @@ fn test_list_symlink_dir() {
             path_type: PathType::Directory,
             entries: vec![
                 Entry {
-                    file_name: s!("id3v23_most_tags.mp3"),
-                    file_size: 22993,
+                    name: s!("id3v23_most_tags.mp3"),
+                    size: 22993,
                     title: vec![s!("Best Song Ever")],
                     title_sort_order: None,
                     artist: vec![s!("Someone")],
@@ -312,8 +312,8 @@ fn test_list_symlink_dir() {
                     genre: vec![s!("Pop")]
                 },
                 Entry {
-                    file_name: s!("id3v23_some_tags.mp3"),
-                    file_size: 22993,
+                    name: s!("id3v23_some_tags.mp3"),
+                    size: 22993,
                     title: vec![s!("Best Song Ever")],
                     title_sort_order: None,
                     artist: vec![s!("Someone")],
@@ -328,8 +328,8 @@ fn test_list_symlink_dir() {
                     genre: vec![]
                 },
                 Entry {
-                    file_name: s!("id3v24_most_tags.mp3"),
-                    file_size: 23017,
+                    name: s!("id3v24_most_tags.mp3"),
+                    size: 23017,
                     title: vec![s!("Best Song Ever")],
                     title_sort_order: None,
                     artist: vec![s!("Someone")],
@@ -344,8 +344,8 @@ fn test_list_symlink_dir() {
                     genre: vec![s!("Pop")]
                 },
                 Entry {
-                    file_name: s!("id3v24_some_tags.mp3"),
-                    file_size: 23017,
+                    name: s!("id3v24_some_tags.mp3"),
+                    size: 23017,
                     title: vec![s!("Best Song Ever")],
                     title_sort_order: None,
                     artist: vec![s!("Someone")],
@@ -381,7 +381,7 @@ fn test_list_multiple_dirs() {
     let results = list(
         &vec![path1.clone(), path2.clone()],
         &ListOptions {
-            sort_by: &[SortBy::FileName],
+            sort_by: &[SortBy::Name],
             reverse: &false,
             recursive: &false,
         },
@@ -392,16 +392,16 @@ fn test_list_multiple_dirs() {
     assert_eq!(results.len(), 2);
     assert_eq!(results[0].path, path1);
     assert_eq!(results[0].entries.len(), 4);
-    assert_eq!(results[0].entries[0].file_name, "id3v23_most_tags.mp3");
-    assert_eq!(results[0].entries[1].file_name, "id3v23_some_tags.mp3");
-    assert_eq!(results[0].entries[2].file_name, "id3v24_most_tags.mp3");
-    assert_eq!(results[0].entries[3].file_name, "id3v24_some_tags.mp3");
+    assert_eq!(results[0].entries[0].name, "id3v23_most_tags.mp3");
+    assert_eq!(results[0].entries[1].name, "id3v23_some_tags.mp3");
+    assert_eq!(results[0].entries[2].name, "id3v24_most_tags.mp3");
+    assert_eq!(results[0].entries[3].name, "id3v24_some_tags.mp3");
     assert_eq!(results[1].path, path2);
     assert_eq!(results[1].entries.len(), 4);
-    assert_eq!(results[1].entries[0].file_name, "id3v23_most_tags.mp3");
-    assert_eq!(results[1].entries[1].file_name, "id3v23_some_tags.mp3");
-    assert_eq!(results[1].entries[2].file_name, "id3v24_most_tags.mp3");
-    assert_eq!(results[1].entries[3].file_name, "id3v24_some_tags.mp3");
+    assert_eq!(results[1].entries[0].name, "id3v23_most_tags.mp3");
+    assert_eq!(results[1].entries[1].name, "id3v23_some_tags.mp3");
+    assert_eq!(results[1].entries[2].name, "id3v24_most_tags.mp3");
+    assert_eq!(results[1].entries[3].name, "id3v24_some_tags.mp3");
 }
 
 #[test]
@@ -412,7 +412,7 @@ fn test_list_cwd() {
         list(
             &vec![],
             &ListOptions {
-                sort_by: &[SortBy::FileName],
+                sort_by: &[SortBy::Name],
                 reverse: &false,
                 recursive: &false,
             },
@@ -423,8 +423,8 @@ fn test_list_cwd() {
             path_type: PathType::Directory,
             entries: vec![
                 Entry {
-                    file_name: s!("id3v23_all_tags.mp3"),
-                    file_size: 22993,
+                    name: s!("id3v23_all_tags.mp3"),
+                    size: 22993,
                     title: vec![s!("Best Song Ever"), s!("Really Cool Song")],
                     title_sort_order: Some(vec![s!("Ever, Best Song")]),
                     artist: vec![s!("Someone"), s!("Noone")],
@@ -442,8 +442,8 @@ fn test_list_cwd() {
                     genre: vec![s!("Pop")]
                 },
                 Entry {
-                    file_name: s!("id3v23_most_tags.mp3"),
-                    file_size: 22993,
+                    name: s!("id3v23_most_tags.mp3"),
+                    size: 22993,
                     title: vec![s!("Best Song Ever")],
                     title_sort_order: None,
                     artist: vec![s!("Someone")],
@@ -458,8 +458,8 @@ fn test_list_cwd() {
                     genre: vec![s!("Pop")]
                 },
                 Entry {
-                    file_name: s!("id3v23_no_tags.mp3"),
-                    file_size: 22950,
+                    name: s!("id3v23_no_tags.mp3"),
+                    size: 22950,
                     title: vec![],
                     title_sort_order: None,
                     artist: vec![],
@@ -474,8 +474,8 @@ fn test_list_cwd() {
                     genre: vec![]
                 },
                 Entry {
-                    file_name: s!("id3v23_some_tags.mp3"),
-                    file_size: 22993,
+                    name: s!("id3v23_some_tags.mp3"),
+                    size: 22993,
                     title: vec![s!("Best Song Ever")],
                     title_sort_order: None,
                     artist: vec![s!("Someone")],
@@ -490,8 +490,8 @@ fn test_list_cwd() {
                     genre: vec![]
                 },
                 Entry {
-                    file_name: s!("id3v24_all_tags.mp3"),
-                    file_size: 23017,
+                    name: s!("id3v24_all_tags.mp3"),
+                    size: 23017,
                     title: vec![s!("Best Song Ever"), s!("Really Cool Song")],
                     title_sort_order: Some(vec![s!("Ever, Best Song")]),
                     artist: vec![s!("Someone"), s!("Noone")],
@@ -509,8 +509,8 @@ fn test_list_cwd() {
                     genre: vec![s!("Pop")]
                 },
                 Entry {
-                    file_name: s!("id3v24_most_tags.mp3"),
-                    file_size: 23017,
+                    name: s!("id3v24_most_tags.mp3"),
+                    size: 23017,
                     title: vec![s!("Best Song Ever")],
                     title_sort_order: None,
                     artist: vec![s!("Someone")],
@@ -525,8 +525,8 @@ fn test_list_cwd() {
                     genre: vec![s!("Pop")]
                 },
                 Entry {
-                    file_name: s!("id3v24_no_tags.mp3"),
-                    file_size: 22950,
+                    name: s!("id3v24_no_tags.mp3"),
+                    size: 22950,
                     title: vec![],
                     title_sort_order: None,
                     artist: vec![],
@@ -541,8 +541,8 @@ fn test_list_cwd() {
                     genre: vec![]
                 },
                 Entry {
-                    file_name: s!("id3v24_some_tags.mp3"),
-                    file_size: 23017,
+                    name: s!("id3v24_some_tags.mp3"),
+                    size: 23017,
                     title: vec![s!("Best Song Ever")],
                     title_sort_order: None,
                     artist: vec![s!("Someone")],
@@ -568,7 +568,7 @@ fn test_list_dir_recursive() {
     let results = list(
         &vec![path.clone()],
         &ListOptions {
-            sort_by: &[SortBy::FileName],
+            sort_by: &[SortBy::Name],
             reverse: &false,
             recursive: &true,
         },
@@ -591,26 +591,26 @@ fn test_list_dir_recursive() {
     assert_eq!(results.len(), 3);
     assert_eq!(results[0].path, path);
     assert_eq!(results[0].entries.len(), 8);
-    assert_eq!(results[0].entries[0].file_name, "id3v23_all_tags.mp3");
-    assert_eq!(results[0].entries[1].file_name, "id3v23_most_tags.mp3");
-    assert_eq!(results[0].entries[2].file_name, "id3v23_no_tags.mp3");
-    assert_eq!(results[0].entries[3].file_name, "id3v23_some_tags.mp3");
-    assert_eq!(results[0].entries[4].file_name, "id3v24_all_tags.mp3");
-    assert_eq!(results[0].entries[5].file_name, "id3v24_most_tags.mp3");
-    assert_eq!(results[0].entries[6].file_name, "id3v24_no_tags.mp3");
-    assert_eq!(results[0].entries[7].file_name, "id3v24_some_tags.mp3");
+    assert_eq!(results[0].entries[0].name, "id3v23_all_tags.mp3");
+    assert_eq!(results[0].entries[1].name, "id3v23_most_tags.mp3");
+    assert_eq!(results[0].entries[2].name, "id3v23_no_tags.mp3");
+    assert_eq!(results[0].entries[3].name, "id3v23_some_tags.mp3");
+    assert_eq!(results[0].entries[4].name, "id3v24_all_tags.mp3");
+    assert_eq!(results[0].entries[5].name, "id3v24_most_tags.mp3");
+    assert_eq!(results[0].entries[6].name, "id3v24_no_tags.mp3");
+    assert_eq!(results[0].entries[7].name, "id3v24_some_tags.mp3");
     assert_eq!(results[1].path, subpath1);
     assert_eq!(results[1].entries.len(), 4);
-    assert_eq!(results[1].entries[0].file_name, "id3v23_most_tags.mp3");
-    assert_eq!(results[1].entries[1].file_name, "id3v23_some_tags.mp3");
-    assert_eq!(results[1].entries[2].file_name, "id3v24_most_tags.mp3");
-    assert_eq!(results[1].entries[3].file_name, "id3v24_some_tags.mp3");
+    assert_eq!(results[1].entries[0].name, "id3v23_most_tags.mp3");
+    assert_eq!(results[1].entries[1].name, "id3v23_some_tags.mp3");
+    assert_eq!(results[1].entries[2].name, "id3v24_most_tags.mp3");
+    assert_eq!(results[1].entries[3].name, "id3v24_some_tags.mp3");
     assert_eq!(results[2].path, subpath2);
     assert_eq!(results[2].entries.len(), 4);
-    assert_eq!(results[2].entries[0].file_name, "id3v23_most_tags.mp3");
-    assert_eq!(results[2].entries[1].file_name, "id3v23_some_tags.mp3");
-    assert_eq!(results[2].entries[2].file_name, "id3v24_most_tags.mp3");
-    assert_eq!(results[2].entries[3].file_name, "id3v24_some_tags.mp3");
+    assert_eq!(results[2].entries[0].name, "id3v23_most_tags.mp3");
+    assert_eq!(results[2].entries[1].name, "id3v23_some_tags.mp3");
+    assert_eq!(results[2].entries[2].name, "id3v24_most_tags.mp3");
+    assert_eq!(results[2].entries[3].name, "id3v24_some_tags.mp3");
 }
 
 #[test]
@@ -619,7 +619,7 @@ fn test_order_reverse() {
     let results = list(
         &vec![path.clone()],
         &ListOptions {
-            sort_by: &[SortBy::FileName],
+            sort_by: &[SortBy::Name],
             reverse: &true,
             recursive: &false,
         },
@@ -630,14 +630,14 @@ fn test_order_reverse() {
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].path, path);
     assert_eq!(results[0].entries.len(), 8);
-    assert_eq!(results[0].entries[0].file_name, "id3v24_some_tags.mp3");
-    assert_eq!(results[0].entries[1].file_name, "id3v24_no_tags.mp3");
-    assert_eq!(results[0].entries[2].file_name, "id3v24_most_tags.mp3");
-    assert_eq!(results[0].entries[3].file_name, "id3v24_all_tags.mp3");
-    assert_eq!(results[0].entries[4].file_name, "id3v23_some_tags.mp3");
-    assert_eq!(results[0].entries[5].file_name, "id3v23_no_tags.mp3");
-    assert_eq!(results[0].entries[6].file_name, "id3v23_most_tags.mp3");
-    assert_eq!(results[0].entries[7].file_name, "id3v23_all_tags.mp3");
+    assert_eq!(results[0].entries[0].name, "id3v24_some_tags.mp3");
+    assert_eq!(results[0].entries[1].name, "id3v24_no_tags.mp3");
+    assert_eq!(results[0].entries[2].name, "id3v24_most_tags.mp3");
+    assert_eq!(results[0].entries[3].name, "id3v24_all_tags.mp3");
+    assert_eq!(results[0].entries[4].name, "id3v23_some_tags.mp3");
+    assert_eq!(results[0].entries[5].name, "id3v23_no_tags.mp3");
+    assert_eq!(results[0].entries[6].name, "id3v23_most_tags.mp3");
+    assert_eq!(results[0].entries[7].name, "id3v23_all_tags.mp3");
 }
 
 #[test]
@@ -646,7 +646,7 @@ fn test_order_by_multiple_fields() {
     let results = list(
         &vec![path.clone()],
         &ListOptions {
-            sort_by: &[SortBy::Album, SortBy::Title, SortBy::Track, SortBy::FileName],
+            sort_by: &[SortBy::Album, SortBy::Title, SortBy::Track, SortBy::Name],
             reverse: &false,
             recursive: &false,
         },
@@ -657,12 +657,12 @@ fn test_order_by_multiple_fields() {
     assert_eq!(results.len(), 1);
     assert_eq!(results[0].path, path);
     assert_eq!(results[0].entries.len(), 8);
-    assert_eq!(results[0].entries[0].file_name, "id3v23_no_tags.mp3");
-    assert_eq!(results[0].entries[1].file_name, "id3v24_no_tags.mp3");
-    assert_eq!(results[0].entries[2].file_name, "id3v23_some_tags.mp3");
-    assert_eq!(results[0].entries[3].file_name, "id3v24_some_tags.mp3");
-    assert_eq!(results[0].entries[4].file_name, "id3v23_all_tags.mp3");
-    assert_eq!(results[0].entries[5].file_name, "id3v24_all_tags.mp3");
-    assert_eq!(results[0].entries[6].file_name, "id3v23_most_tags.mp3");
-    assert_eq!(results[0].entries[7].file_name, "id3v24_most_tags.mp3");
+    assert_eq!(results[0].entries[0].name, "id3v23_no_tags.mp3");
+    assert_eq!(results[0].entries[1].name, "id3v24_no_tags.mp3");
+    assert_eq!(results[0].entries[2].name, "id3v23_some_tags.mp3");
+    assert_eq!(results[0].entries[3].name, "id3v24_some_tags.mp3");
+    assert_eq!(results[0].entries[4].name, "id3v23_all_tags.mp3");
+    assert_eq!(results[0].entries[5].name, "id3v24_all_tags.mp3");
+    assert_eq!(results[0].entries[6].name, "id3v23_most_tags.mp3");
+    assert_eq!(results[0].entries[7].name, "id3v24_most_tags.mp3");
 }

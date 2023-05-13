@@ -118,12 +118,12 @@ pub struct Entry {
     #[tabled(rename = "NAME")]
     #[tabled(display_with = "display_os_string")]
     #[serde(serialize_with = "serialize_os_string")]
-    pub file_name: OsString,
+    pub name: OsString,
 
     /// The size of the file.
     #[tabled(rename = "SIZE")]
     #[tabled(display_with = "human_readable_size")]
-    pub file_size: u64,
+    pub size: u64,
 
     /// The track title.
     #[tabled(rename = "TITLE")]
