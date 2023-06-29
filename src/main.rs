@@ -92,57 +92,78 @@ fn main() {
         },
     )
     .unwrap_or_else(|err| error(err));
-    let (mut tables, mut values): (Vec<String>, Vec<Value>) = match args.format {
-        Format::Table => (Vec::with_capacity(results.len()), Vec::with_capacity(0)),
-        Format::Json => (Vec::with_capacity(0), Vec::with_capacity(results.len())),
-    };
-    if results.len() == 1 {
-        match args.format {
-            Format::Table => tables.push(to_table(&results[0].entries)),
-            Format::Json => values.push(to_json(&results[0].entries)),
-        }
-    } else {
-        let (files, dirs): (Vec<_>, Vec<_>) = results.into_iter().partition(|f| f.path_type == lsmp3::PathType::File);
-        if !files.is_empty() {
-            let mut f = files.into_iter().flat_map(|f| f.entries).collect::<Vec<_>>();
-            f.sort_unstable_by(|a, b| {
-                let ord = lsmp3::cmp_entry(a, b, &args.sort_by);
-                if args.reverse {
-                    ord.reverse()
-                } else {
-                    ord
+    match args.format {
+        Format::Table => {
+            let mut tables = Vec::with_capacity(results.len());
+            if results.len() == 1 {
+                tables.push(to_table(&results[0].entries));
+            } else {
+                let (files, dirs): (Vec<_>, Vec<_>) =
+                    results.into_iter().partition(|f| f.path_type == lsmp3::PathType::File);
+                if !files.is_empty() {
+                    let mut f = files.into_iter().flat_map(|f| f.entries).collect::<Vec<_>>();
+                    f.sort_unstable_by(|a, b| {
+                        let ord = lsmp3::cmp_entry(a, b, &args.sort_by);
+                        if args.reverse {
+                            ord.reverse()
+                        } else {
+                            ord
+                        }
+                    });
+                    tables.push(to_table(&f));
                 }
-            });
-            match args.format {
-                Format::Table => tables.push(to_table(&f)),
-                Format::Json => values.push(to_json(&f)),
+                if !dirs.is_empty() {
+                    tables.extend(dirs.iter().map(|f| format!("{}:\n{}", f.path, to_table(&f.entries))));
+                }
+
+                for (i, table) in tables.iter().enumerate() {
+                    print!("{}", table);
+                    if i < tables.len() - 1 {
+                        println!();
+                    }
+                }
             }
         }
-        if !dirs.is_empty() {
-            match args.format {
-                Format::Table => tables.extend(dirs.iter().map(|f| format!("{}:\n{}", f.path, to_table(&f.entries)))),
-                Format::Json => values.extend(dirs.iter().map(|f| {
-                    json!({
-                        "path": f.path,
-                        "values": to_json(&f.entries),
-                    })
-                })),
+        Format::Json => {
+            let mut values = Vec::with_capacity(results.len());
+            if results.len() == 1 {
+                values.push(to_json(&results[0].entries));
+            } else {
+                let (files, dirs): (Vec<_>, Vec<_>) =
+                    results.into_iter().partition(|f| f.path_type == lsmp3::PathType::File);
+                if !files.is_empty() {
+                    let mut f = files.into_iter().flat_map(|f| f.entries).collect::<Vec<_>>();
+                    f.sort_unstable_by(|a, b| {
+                        let ord = lsmp3::cmp_entry(a, b, &args.sort_by);
+                        if args.reverse {
+                            ord.reverse()
+                        } else {
+                            ord
+                        }
+                    });
+                    values.push(to_json(&f));
+                }
+                if !dirs.is_empty() {
+                    values.extend(dirs.iter().map(|f| {
+                        json!({
+                            "path": f.path,
+                            "values": to_json(&f.entries),
+                        })
+                    }));
+                }
+
+                print!(
+                    "{}",
+                    if values.len() == 1 {
+                        serde_json::to_string(&values[0])
+                    } else {
+                        serde_json::to_string(&values)
+                    }
+                    .unwrap_or_else(|err| error(err))
+                )
             }
         }
     }
-
-    print!(
-        "{}",
-        match args.format {
-            Format::Table => tables.join("\n"),
-            Format::Json => if values.len() == 1 {
-                serde_json::to_string(&values[0])
-            } else {
-                serde_json::to_string(&values)
-            }
-            .unwrap_or_else(|err| error(err)),
-        }
-    )
 }
 
 #[cfg(test)]
